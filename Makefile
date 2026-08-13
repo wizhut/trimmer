@@ -131,7 +131,8 @@ clean:
 	@rm -rf $(OUTPUT_DIR) $(DIST_DIR)
 	@echo "  \033[32m[clean]\033[0m Done"
 
-# Package each cross-build with the README: .tar.gz for unix, .zip for windows.
+# Package each cross-build with the README and LICENSE: .tar.gz for unix,
+# .zip for windows.
 release: all
 	@echo ""
 	@echo "  \033[36m[release]\033[0m Packaging $(APP_NAME) $(VERSION)..."
@@ -140,7 +141,7 @@ release: all
 	@for p in $(UNIX_PLATFORMS); do \
 		mkdir -p $(DIST_DIR)/$$p; \
 		cp $(OUTPUT_DIR)/$(APP_NAME)-$$p $(DIST_DIR)/$$p/$(APP_NAME); \
-		cp README.md $(DIST_DIR)/$$p/; \
+		cp README.md LICENSE $(DIST_DIR)/$$p/; \
 		tar -czf $(DIST_DIR)/$(APP_NAME)-$(VERSION)-$$p.tar.gz -C $(DIST_DIR)/$$p .; \
 		rm -rf $(DIST_DIR)/$$p; \
 		echo "    \033[32m✅\033[0m $(DIST_DIR)/$(APP_NAME)-$(VERSION)-$$p.tar.gz"; \
@@ -148,7 +149,7 @@ release: all
 	@for p in $(WIN_PLATFORMS); do \
 		mkdir -p $(DIST_DIR)/$$p; \
 		cp $(OUTPUT_DIR)/$(APP_NAME)-$$p.exe $(DIST_DIR)/$$p/$(APP_NAME).exe; \
-		cp README.md $(DIST_DIR)/$$p/; \
+		cp README.md LICENSE $(DIST_DIR)/$$p/; \
 		zip -j -q $(DIST_DIR)/$(APP_NAME)-$(VERSION)-$$p.zip $(DIST_DIR)/$$p/*; \
 		rm -rf $(DIST_DIR)/$$p; \
 		echo "    \033[32m✅\033[0m $(DIST_DIR)/$(APP_NAME)-$(VERSION)-$$p.zip"; \

@@ -116,6 +116,7 @@ make vet     # go vet
 make build   # build to bin/
 ```
 
-## Licence
+## License
 
-Provided by [wizhut.tech](https://wizhut.tech). Free to use for any purpose.
+MIT — see [LICENSE](LICENSE). Provided by [wizhut.tech](https://wizhut.tech),
+free to use for any purpose.
