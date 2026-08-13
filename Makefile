@@ -2,10 +2,17 @@ APP_NAME := trimmer
 OUTPUT_DIR := bin
 DIST_DIR := dist
 
+# Public download bucket, shared with the other wizhut CLIs. The corporate-site
+# landing page (pages/trimmer.vue) links straight at these object names, so the
+# archive naming below — $(APP_NAME)-<goos>-<goarch>-$(VERSION).<ext> — is a
+# contract, not a preference.
+GCS_BUCKET := gs://wizhut-tools-downloads
+GCS_PREFIX := $(GCS_BUCKET)/$(APP_NAME)
+
 # Single source of truth for the version is the `version` const in main.go.
 VERSION := $(shell sed -n 's/^const version = "\(.*\)"/\1/p' main.go)
 
-.PHONY: help build test vet install all clean release mac linux windows mac-intel mac-arm windows-amd64 windows-arm64 linux-amd64 linux-arm64
+.PHONY: help build test vet install all clean release publish mac linux windows mac-intel mac-arm windows-amd64 windows-arm64 linux-amd64 linux-arm64
 
 .DEFAULT_GOAL := help
 
@@ -26,6 +33,7 @@ help:
 	@echo "  \033[1;4mRelease\033[0m"
 	@echo "    \033[36mall\033[0m          Cross-compile for every platform below"
 	@echo "    \033[36mrelease\033[0m      Package cross-platform builds into $(DIST_DIR)/"
+	@echo "    \033[36mpublish\033[0m      Release + upload archives to the public GCS bucket"
 	@echo ""
 	@echo "  \033[1;4mPlatforms\033[0m"
 	@echo "    \033[36mmac\033[0m          darwin: amd64 + arm64"
@@ -142,17 +150,29 @@ release: all
 		mkdir -p $(DIST_DIR)/$$p; \
 		cp $(OUTPUT_DIR)/$(APP_NAME)-$$p $(DIST_DIR)/$$p/$(APP_NAME); \
 		cp README.md LICENSE $(DIST_DIR)/$$p/; \
-		tar -czf $(DIST_DIR)/$(APP_NAME)-$(VERSION)-$$p.tar.gz -C $(DIST_DIR)/$$p .; \
+		tar -czf $(DIST_DIR)/$(APP_NAME)-$$p-$(VERSION).tar.gz -C $(DIST_DIR)/$$p .; \
 		rm -rf $(DIST_DIR)/$$p; \
-		echo "    \033[32m✅\033[0m $(DIST_DIR)/$(APP_NAME)-$(VERSION)-$$p.tar.gz"; \
+		echo "    \033[32m✅\033[0m $(DIST_DIR)/$(APP_NAME)-$$p-$(VERSION).tar.gz"; \
 	done
 	@for p in $(WIN_PLATFORMS); do \
 		mkdir -p $(DIST_DIR)/$$p; \
 		cp $(OUTPUT_DIR)/$(APP_NAME)-$$p.exe $(DIST_DIR)/$$p/$(APP_NAME).exe; \
 		cp README.md LICENSE $(DIST_DIR)/$$p/; \
-		zip -j -q $(DIST_DIR)/$(APP_NAME)-$(VERSION)-$$p.zip $(DIST_DIR)/$$p/*; \
+		zip -j -q $(DIST_DIR)/$(APP_NAME)-$$p-$(VERSION).zip $(DIST_DIR)/$$p/*; \
 		rm -rf $(DIST_DIR)/$$p; \
-		echo "    \033[32m✅\033[0m $(DIST_DIR)/$(APP_NAME)-$(VERSION)-$$p.zip"; \
+		echo "    \033[32m✅\033[0m $(DIST_DIR)/$(APP_NAME)-$$p-$(VERSION).zip"; \
 	done
 	@echo ""
 	@echo "  \033[32m[release]\033[0m Packages ready in $(DIST_DIR)/"
+
+# Upload the packaged archives to the public download bucket. Objects inherit
+# the bucket's allUsers:objectViewer binding, so they are world-readable at
+# https://storage.googleapis.com/wizhut-tools-downloads/$(APP_NAME)/<file>.
+# Requires an authenticated gcloud (`gcloud auth login`) with write access.
+publish: release
+	@echo ""
+	@echo "  \033[36m[publish]\033[0m Uploading $(APP_NAME) $(VERSION) to $(GCS_PREFIX)/ ..."
+	@gcloud storage cp $(DIST_DIR)/$(APP_NAME)-*-$(VERSION).tar.gz $(DIST_DIR)/$(APP_NAME)-*-$(VERSION).zip $(GCS_PREFIX)/
+	@echo ""
+	@gcloud storage ls -l $(GCS_PREFIX)/
+	@echo "  \033[32m[publish]\033[0m Live at https://storage.googleapis.com/wizhut-tools-downloads/$(APP_NAME)/"

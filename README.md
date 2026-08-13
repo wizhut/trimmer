@@ -39,16 +39,21 @@ Individual targets are also available: `mac-intel`, `mac-arm`, `linux-amd64`,
 `bin/trimmer-<goos>-<goarch>` (`.exe` on Windows), built with `CGO_ENABLED=0`
 and `-trimpath -ldflags "-s -w"` so they are static and stripped.
 
-`make release` then packages each build together with this README into `dist/`
-— `.tar.gz` for macOS/Linux, `.zip` for Windows, version-stamped from the
-`version` const in `main.go`:
+`make release` then packages each build together with this README and LICENSE
+into `dist/` — `.tar.gz` for macOS/Linux, `.zip` for Windows, version-stamped
+from the `version` const in `main.go`:
 
 ```
-dist/trimmer-1.0.0-darwin-arm64.tar.gz
-dist/trimmer-1.0.0-linux-amd64.tar.gz
-dist/trimmer-1.0.0-windows-amd64.zip
+dist/trimmer-darwin-arm64-1.0.0.tar.gz
+dist/trimmer-linux-amd64-1.0.0.tar.gz
+dist/trimmer-windows-amd64-1.0.0.zip
 ...
 ```
+
+`make publish` runs the release and uploads those archives to the public
+download bucket behind
+[wizhut.tech/trimmer](https://wizhut.tech/trimmer). It needs an authenticated
+`gcloud` with write access to `gs://wizhut-tools-downloads`.
 
 ## Usage
 
