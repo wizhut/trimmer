@@ -53,11 +53,17 @@ by adding one target plus an entry in `UNIX_PLATFORMS` / `WIN_PLATFORMS`; the
   the TTY guard's usage, and (printed separately) `--version` — instead of only
   on `--help`. Don't duplicate it back into `Long`.
 
+## Distribution
+
+Published downloads are addressed by archive name, so
+`$(APP_NAME)-<goos>-<goarch>-$(VERSION).<ext>` is a contract, not a preference —
+don't reshuffle the fields when adding platforms.
+
 ## Version
 
 `version` is a const in [main.go](main.go). Bump it there when cutting a release
 — the Makefile scrapes it for the `dist/` archive names, so it is the only place
-to change.
+to change in this repo.
 
 ## Licence
 
