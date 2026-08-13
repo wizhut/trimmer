@@ -132,7 +132,9 @@ clean:
 	@echo "  \033[32m[clean]\033[0m Done"
 
 # Package each cross-build with the README and LICENSE: .tar.gz for unix,
-# .zip for windows.
+# .zip for windows. Archives are named
+# $(APP_NAME)-<goos>-<goarch>-$(VERSION).<ext>; downloads are published under
+# those names, so treat the pattern as a contract rather than a preference.
 release: all
 	@echo ""
 	@echo "  \033[36m[release]\033[0m Packaging $(APP_NAME) $(VERSION)..."
@@ -142,17 +144,17 @@ release: all
 		mkdir -p $(DIST_DIR)/$$p; \
 		cp $(OUTPUT_DIR)/$(APP_NAME)-$$p $(DIST_DIR)/$$p/$(APP_NAME); \
 		cp README.md LICENSE $(DIST_DIR)/$$p/; \
-		tar -czf $(DIST_DIR)/$(APP_NAME)-$(VERSION)-$$p.tar.gz -C $(DIST_DIR)/$$p .; \
+		tar -czf $(DIST_DIR)/$(APP_NAME)-$$p-$(VERSION).tar.gz -C $(DIST_DIR)/$$p .; \
 		rm -rf $(DIST_DIR)/$$p; \
-		echo "    \033[32m✅\033[0m $(DIST_DIR)/$(APP_NAME)-$(VERSION)-$$p.tar.gz"; \
+		echo "    \033[32m✅\033[0m $(DIST_DIR)/$(APP_NAME)-$$p-$(VERSION).tar.gz"; \
 	done
 	@for p in $(WIN_PLATFORMS); do \
 		mkdir -p $(DIST_DIR)/$$p; \
 		cp $(OUTPUT_DIR)/$(APP_NAME)-$$p.exe $(DIST_DIR)/$$p/$(APP_NAME).exe; \
 		cp README.md LICENSE $(DIST_DIR)/$$p/; \
-		zip -j -q $(DIST_DIR)/$(APP_NAME)-$(VERSION)-$$p.zip $(DIST_DIR)/$$p/*; \
+		zip -j -q $(DIST_DIR)/$(APP_NAME)-$$p-$(VERSION).zip $(DIST_DIR)/$$p/*; \
 		rm -rf $(DIST_DIR)/$$p; \
-		echo "    \033[32m✅\033[0m $(DIST_DIR)/$(APP_NAME)-$(VERSION)-$$p.zip"; \
+		echo "    \033[32m✅\033[0m $(DIST_DIR)/$(APP_NAME)-$$p-$(VERSION).zip"; \
 	done
 	@echo ""
 	@echo "  \033[32m[release]\033[0m Packages ready in $(DIST_DIR)/"
