@@ -1,0 +1,11 @@
+bin/
+dist/
+trimmer
+
+.DS_Store
+.idea/
+*.test
+*.out
+
+.claude/settings.local.json
+.claude/worktrees
