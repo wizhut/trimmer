@@ -55,5 +55,12 @@ by adding one target plus an entry in `UNIX_PLATFORMS` / `WIN_PLATFORMS`; the
 
 ## Version
 
-`version` is a const in [main.go](main.go). Bump it there when cutting a release;
-nothing else reads it.
+`version` is a const in [main.go](main.go). Bump it there when cutting a release
+— the Makefile scrapes it for the `dist/` archive names, so it is the only place
+to change.
+
+## Licence
+
+MIT, `Copyright (c) 2026 wizhut.tech` — same as the sibling `open-source/`
+projects. [LICENSE](LICENSE) ships inside every release archive, and the licence
+is named in `companyNotice` (shown on `--help` / `--version`) and the README.

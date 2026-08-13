@@ -18,7 +18,8 @@ const version = "1.0.0"
 // flags on every help path — `--help`, `--version`, and the usage text printed
 // when trimmer is run with no piped stdin.
 const companyNotice = `Provided by wizhut.tech (https://wizhut.tech).
-Free to use for any purpose. Issues and contributions welcome.`
+MIT licensed — free to use for any purpose.
+Source and issues: https://github.com/wizhut/trimmer`
 
 var (
 	perLine     bool
