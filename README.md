@@ -13,6 +13,18 @@ and the very end are trimmed — inner blank lines and indentation are left alon
 
 ## Install
 
+Grab a prebuilt binary for your platform from the
+[latest release](https://github.com/wizhut/trimmer/releases/latest) — macOS,
+Linux and Windows, amd64 and arm64. Archives are named
+`trimmer-<goos>-<goarch>-<version>.tar.gz` (`.zip` on Windows), and each release
+ships a `trimmer-<version>-checksums.txt` with their SHA-256 sums:
+
+```bash
+tar xzf trimmer-darwin-arm64-1.0.0.tar.gz && ./trimmer --version
+```
+
+With Go installed:
+
 ```bash
 go install github.com/wizhut/trimmer@latest
 ```
@@ -50,8 +62,19 @@ dist/trimmer-windows-amd64-1.0.0.zip
 ...
 ```
 
-Prebuilt archives for each release are linked from
-[wizhut.tech/trimmer](https://wizhut.tech/trimmer).
+### Releasing
+
+Releases are cut from a tag. Bump the `version` const in `main.go`, commit, then:
+
+```bash
+make tag
+```
+
+That pushes `v<version>`, and
+[`.github/workflows/release.yml`](.github/workflows/release.yml) takes it from
+there: it checks the tag against the `version` const, runs `vet` and `test`,
+builds all six archives with `make release`, and publishes them — with generated
+release notes and the checksums file — as a GitHub release.
 
 ## Usage
 
