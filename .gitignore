@@ -9,3 +9,11 @@ trimmer
 
 .claude/settings.local.json
 .claude/worktrees
+
+# Credentials — never commit
+.env
+.env.*
+!.env.example
+.npmrc
+*.pem
+*.key
