@@ -5,7 +5,7 @@ DIST_DIR := dist
 # Single source of truth for the version is the `version` const in main.go.
 VERSION := $(shell sed -n 's/^const version = "\(.*\)"/\1/p' main.go)
 
-.PHONY: help build test vet install all clean release mac linux windows mac-intel mac-arm windows-amd64 windows-arm64 linux-amd64 linux-arm64
+.PHONY: help build test vet install all clean release tag mac linux windows mac-intel mac-arm windows-amd64 windows-arm64 linux-amd64 linux-arm64
 
 .DEFAULT_GOAL := help
 
@@ -26,6 +26,7 @@ help:
 	@echo "  \033[1;4mRelease\033[0m"
 	@echo "    \033[36mall\033[0m          Cross-compile for every platform below"
 	@echo "    \033[36mrelease\033[0m      Package cross-platform builds into $(DIST_DIR)/"
+	@echo "    \033[36mtag\033[0m          Tag v$(VERSION) and push it — CI publishes the release"
 	@echo ""
 	@echo "  \033[1;4mPlatforms\033[0m"
 	@echo "    \033[36mmac\033[0m          darwin: amd64 + arm64"
@@ -156,5 +157,21 @@ release: all
 		rm -rf $(DIST_DIR)/$$p; \
 		echo "    \033[32m✅\033[0m $(DIST_DIR)/$(APP_NAME)-$$p-$(VERSION).zip"; \
 	done
+	@sha() { if command -v sha256sum >/dev/null 2>&1; then sha256sum "$$@"; else shasum -a 256 "$$@"; fi; }; \
+	cd $(DIST_DIR) && sha $(APP_NAME)-*-$(VERSION).tar.gz $(APP_NAME)-*-$(VERSION).zip > $(APP_NAME)-$(VERSION)-checksums.txt
+	@echo "    \033[32m✅\033[0m $(DIST_DIR)/$(APP_NAME)-$(VERSION)-checksums.txt"
 	@echo ""
 	@echo "  \033[32m[release]\033[0m Packages ready in $(DIST_DIR)/"
+
+# Cutting a release is a tag push: the workflow in .github/workflows/release.yml
+# re-runs vet + test + release on the tag and uploads dist/ to a GitHub release.
+tag:
+	@if [ -n "$$(git status --porcelain)" ]; then \
+		echo "  \033[31m[tag]\033[0m Working tree is dirty — commit before tagging"; exit 1; \
+	fi
+	@if git rev-parse -q --verify "refs/tags/v$(VERSION)" >/dev/null; then \
+		echo "  \033[31m[tag]\033[0m v$(VERSION) already exists — bump the version const in main.go"; exit 1; \
+	fi
+	@git tag -a v$(VERSION) -m "$(APP_NAME) $(VERSION)"
+	@git push origin v$(VERSION)
+	@echo "  \033[32m[tag]\033[0m Pushed v$(VERSION) — CI is building the release"

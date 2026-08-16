@@ -22,7 +22,8 @@ make test    # go test with a summarised pass/fail report
 make vet     # go vet
 make all     # cross-compile darwin/linux/windows (amd64+arm64 each) into bin/
 make mac     # or: make linux / make windows — one OS, both arches
-make release # package the cross-builds into dist/
+make release # package the cross-builds into dist/ (+ a SHA-256 checksums file)
+make tag     # tag v<version> and push it — CI publishes the GitHub release
 ```
 
 Cross-compilation runs through the `cross` macro in the
@@ -55,15 +56,26 @@ by adding one target plus an entry in `UNIX_PLATFORMS` / `WIN_PLATFORMS`; the
 
 ## Distribution
 
-Published downloads are addressed by archive name, so
-`$(APP_NAME)-<goos>-<goarch>-$(VERSION).<ext>` is a contract, not a preference —
-don't reshuffle the fields when adding platforms.
+Releases are GitHub releases, cut by pushing a tag. `make tag` pushes
+`v$(VERSION)`, which triggers [release.yml](.github/workflows/release.yml): it
+re-runs `vet` + `test`, then `make release`, and uploads the six archives plus
+the checksums file with `gh release create --generate-notes`. Nothing is
+uploaded by hand, and there is no release step that only works on a maintainer's
+machine.
+
+The workflow's first job is to check the tag against the `version` const and
+fail if they disagree — otherwise a `v1.2.0` release would carry archives named
+`trimmer-<goos>-<goarch>-1.1.0.tar.gz`.
+
+Download URLs are `.../releases/download/v<version>/<archive>`, so the archive
+name `$(APP_NAME)-<goos>-<goarch>-$(VERSION).<ext>` is part of the published
+contract — don't reshuffle the fields when adding platforms.
 
 ## Version
 
 `version` is a const in [main.go](main.go). Bump it there when cutting a release
-— the Makefile scrapes it for the `dist/` archive names, so it is the only place
-to change in this repo.
+— the Makefile scrapes it for the `dist/` archive names and `make tag` derives
+the tag from it, so it is the only place to change in this repo.
 
 ## Licence
 
